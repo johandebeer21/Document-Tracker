@@ -1,114 +1,301 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📌 Document Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Application Tracker</title>
   <style>
-    .fade-in {
-      animation: fadeIn 0.5s ease-in-out forwards;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f3f4f6;
+      margin: 0; padding: 20px;
+      color: #1f2937;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      color: #111827;
+    }
+
+    .client-info {
+      background: #fff;
+      max-width: 600px;
+      margin: 0 auto 30px auto;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #374151;
+      letter-spacing: 0.02em;
+      user-select: none;
+    }
+
+    #search {
+      display: block;
+      max-width: 600px;
+      margin: 0 auto 30px auto;
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+      user-select: auto;
+    }
+    #search:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 12px #3b82f6;
+    }
+
+    #app-list {
+      max-width: 600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      user-select: none;
+    }
+
+    /* Loading skeleton styles */
+    .skeleton-card {
+      background: linear-gradient(90deg, #eee 25%, #ddd 50%, #eee 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      height: 120px;
+      border-radius: 14px;
+    }
+    @keyframes shimmer {
+      0% {background-position: 200% 0;}
+      100% {background-position: -200% 0;}
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transform: translateY(40px) scale(0.95);
       opacity: 0;
+      animation: fadeUpScale 0.5s forwards;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      user-select: text;
     }
-    @keyframes fadeIn {
-      to { opacity: 1; }
+
+    .card:hover {
+      box-shadow: 0 24px 48px rgba(59, 130, 246, 0.3);
+      transform: translateY(-4px) scale(1.02);
     }
+
+    .task-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+
+    .info-row {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: #4b5563;
+      display: flex;
+      justify-content: space-between;
+    }
+
     .status {
-      font-weight: bold;
-      padding: 0.2rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: white;
+      text-transform: uppercase;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
     }
-    .Done { background-color: #4ade80; color: #064e3b; }
-    ."In progress" { background-color: #facc15; color: #78350f; }
-    ."Not started" { background-color: #f87171; color: #7f1d1d; }
+
+    /* Status colors with animated gradients */
+    .Done {
+      background: linear-gradient(270deg, #10b981, #14d79d, #10b981);
+      background-size: 600% 600%;
+      animation: pulseGradient 3s ease infinite;
+      box-shadow: 0 0 12px #10b981cc;
+      color: white;
+    }
+
+    .Pending {
+      background: linear-gradient(270deg, #fbbf24, #fde68a, #fbbf24);
+      background-size: 600% 600%;
+      animation: pulseGradient 3s ease infinite;
+      box-shadow: 0 0 12px #fbbf24cc;
+      color: white;
+    }
+
+    .In-progress {
+      background: linear-gradient(270deg, #3b82f6, #60a5fa, #3b82f6);
+      background-size: 600% 600%;
+      animation: pulseGradient 3s ease infinite;
+      box-shadow: 0 0 12px #3b82f6cc;
+      color: white;
+    }
+
+    .Not-started {
+      background: linear-gradient(270deg, #f59e0b, #fbbf24, #f59e0b);
+      background-size: 600% 600%;
+      animation: pulseGradient 3s ease infinite;
+      box-shadow: 0 0 12px #f59e0bcc;
+      color: white;
+    }
+
+    @keyframes pulseGradient {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    @keyframes fadeUpScale {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) {
+      #app-list {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+    }
   </style>
 </head>
-<body class="bg-gradient-to-br from-gray-100 to-white min-h-screen text-gray-800">
-  <div class="max-w-4xl mx-auto px-4 py-10">
-    <h1 class="text-3xl font-bold text-center mb-6">📌 Document Tracker</h1>
-    <div class="bg-white shadow-md rounded-xl p-6 mb-6">
-      <h2 class="text-xl font-semibold mb-2">Client Info</h2>
-      <p><strong>Name:</strong> <span id="client-name"></span></p>
-      <p><strong>Surname:</strong> <span id="client-surname"></span></p>
-      <p><strong>Application Type:</strong> <span id="application-type"></span></p>
-    </div>
-    <div class="mb-4">
-      <input id="search" type="text" placeholder="Search task..." class="w-full px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-    </div>
-    <div id="app-list" class="grid gap-4"></div>
-  </div>
+<body>
 
-  <script>
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtqULGR-HUX-Lp7ryJrR_KfuG_NeubNjYe3CvCAvDngUHsUf4VXwqZOyCDSScKadslN3JTTBp9ST3Q/pub?output=csv';
-    const PROXY_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(SHEET_URL);
+<h1>Application Tracker</h1>
 
-    const clientName = document.getElementById('client-name');
-    const clientSurname = document.getElementById('client-surname');
-    const applicationType = document.getElementById('application-type');
-    const appList = document.getElementById('app-list');
-    const searchInput = document.getElementById('search');
+<div class="client-info" id="client-info">Loading client info...</div>
 
-    let allTasks = [];
+<input type="text" id="search" placeholder="Search tasks..." autocomplete="off" />
 
-    function parseCSV(text) {
-      const [headerLine, ...lines] = text.trim().split('\n');
-      const headers = headerLine.split(',');
-      return lines.map(line => {
-        const data = line.split(',');
-        const entry = {};
-        headers.forEach((h, i) => entry[h.trim()] = data[i]?.trim() || '');
-        return entry;
-      });
-    }
+<div id="app-list">
+  <!-- Loading skeletons while fetching -->
+  <div class="skeleton-card"></div>
+  <div class="skeleton-card"></div>
+  <div class="skeleton-card"></div>
+</div>
 
-    function renderTasks(tasks) {
-      appList.innerHTML = '';
-      tasks.forEach((task, i) => {
-        const card = document.createElement('div');
-        card.className = 'fade-in bg-white p-4 rounded shadow-md transition-all duration-300';
-        card.style.animationDelay = `${i * 0.05}s`;
-        card.innerHTML = `
-          <h3 class="text-lg font-semibold">${task['Task']}</h3>
-          <p><strong>Status:</strong> <span class="status ${task['Status']}">${task['Status'] || 'Pending'}</span></p>
-          <p><strong>Assignee:</strong> ${task['Assignee'] || '—'}</p>
-          <p><strong>Due Date:</strong> ${task['Due date'] || '—'}</p>
-          <p class="mt-2">${task['Description'] || ''}</p>
-        `;
-        appList.appendChild(card);
-      });
-    }
+<script>
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtqULGR-HUX-Lp7ryJrR_KfuG_NeubNjYe3CvCAvDngUHsUf4VXwqZOyCDSScKadslN3JTTBp9ST3Q/pub?output=csv';
 
-    function fetchAndDisplay() {
-      fetch(PROXY_URL)
-        .then(res => res.text())
-        .then(csv => {
-          const parsed = parseCSV(csv);
-          const [clientRow, ...taskRows] = parsed;
+  let applications = [];
 
-          clientName.textContent = clientRow['Name'] || 'N/A';
-          clientSurname.textContent = clientRow['Surname'] || 'N/A';
-          applicationType.textContent = clientRow['Application Type'] || 'N/A';
-
-          allTasks = taskRows.filter(row => row['Task']);
-          renderTasks(allTasks);
-        })
-        .catch(err => {
-          appList.innerHTML = '<p class="text-red-500">Failed to load data.</p>';
-          console.error(err);
-        });
-    }
-
-    searchInput.addEventListener('input', () => {
-      const term = searchInput.value.toLowerCase();
-      const filtered = allTasks.filter(t => t['Task'].toLowerCase().includes(term));
-      renderTasks(filtered);
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = lines.shift().split(',').map(h => h.trim());
+    return lines.map(line => {
+      const data = line.split(',').map(d => d.trim());
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = data[i] || '');
+      return obj;
     });
+  }
 
-    fetchAndDisplay();
-  </script>
+  const appList = document.getElementById('app-list');
+  const searchInput = document.getElementById('search');
+  const clientInfoDiv = document.getElementById('client-info');
+
+  function renderClientInfo(apps) {
+    if (!apps.length) {
+      clientInfoDiv.textContent = 'No client information found.';
+      return;
+    }
+    const first = apps[0];
+    clientInfoDiv.innerHTML = `
+      <div><strong>Client Name:</strong> ${first['Name'] || '-'}</div>
+      <div><strong>Client Surname:</strong> ${first['Surname'] || '-'}</div>
+      <div><strong>Application Type:</strong> ${first['Application type'] || '-'}</div>
+    `;
+  }
+
+  function renderApps(list) {
+    if (!list.length) {
+      appList.innerHTML = '<p>No applications found.</p>';
+      return;
+    }
+    appList.innerHTML = '';
+    list.forEach((app, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = `${i * 0.1}s`;
+
+      // convert spaces to hyphens for CSS class names
+      const statusClass = app['Status'] ? app['Status'].replace(/\s+/g, '-') : 'Pending';
+
+      card.innerHTML = `
+        <h3 class="task-title">${app['Task']}</h3>
+        <div class="info-row"><span>Status:</span> <span class="status ${statusClass}">${app['Status']}</span></div>
+        <div class="info-row"><span>Assignee:</span> <span>${app['Assignee'] || '-'}</span></div>
+        <div class="info-row"><span>Due date:</span> <span>${app['Due date'] || '-'}</span></div>
+        <div class="info-row"><span>Updated at:</span> <span>${app['Updated at'] || '-'}</span></div>
+      `;
+
+      appList.appendChild(card);
+    });
+  }
+
+  function fetchData() {
+    // Show skeleton loading cards
+    appList.innerHTML = '<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>';
+    clientInfoDiv.textContent = 'Loading client info...';
+
+    // Add cache buster to avoid stale cache issues
+    const urlWithCacheBust = CSV_URL + '&cacheBust=' + Date.now();
+
+    fetch(urlWithCacheBust)
+      .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch'))
+      .then(text => {
+        applications = parseCSV(text);
+        renderClientInfo(applications);
+        renderApps(applications);
+      })
+      .catch(err => {
+        appList.innerHTML = '<p>Failed to load data.</p>';
+        clientInfoDiv.textContent = '';
+        console.error(err);
+      });
+  }
+
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase();
+    const filtered = applications.filter(app => app['Task'].toLowerCase().includes(term));
+    renderApps(filtered);
+  });
+
+  fetchData();
+  setInterval(fetchData, 60000);
+</script>
+
 </body>
 </html>
+
 
 
 
