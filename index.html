@@ -1,14 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Application Tracker</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f9fafb; padding: 20px; }
+  .card { background: white; padding: 16px; margin-bottom: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0; transform: translateY(20px); animation: fadeInUp 0.5s forwards; }
+  .status { padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+  .Done { background: #86efac; color: #166534; }
+  .["Not started"] { background: #fbbf24; color: #92400e; }
+  .Pending { background: #fbbf24; color: #92400e; }
+  @keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<h1>Application Tracker</h1>
+
+<input type="text" id="search" placeholder="Search task..." style="padding:8px; width:100%; max-width:400px; margin-bottom:20px;"/>
+
+<div id="app-list">Loading data...</div>
+
 <script>
-  const CSV_RAW_URL = 'https://docs.google.com/spreadsheets/d/1ZTJWdmeVqziiFBVj3MVB1d03_7bKPEmiYuG8xkIInco/export?format=csv&gid=2052124638';
-  const CSV_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_RAW_URL);
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtqULGR-HUX-Lp7ryJrR_KfuG_NeubNjYe3CvCAvDngUHsUf4VXwqZOyCDSScKadslN3JTTBp9ST3Q/pub?output=csv';
 
   function parseCSV(text) {
     const lines = text.trim().split('\n');
-    const headers = lines.shift().split(',');
+    const headers = lines.shift().split(',').map(h => h.trim());
     return lines.map(line => {
-      const data = line.split(',');
+      const data = line.split(',').map(d => d.trim());
       const obj = {};
-      headers.forEach((h, i) => obj[h.trim()] = data[i] ? data[i].trim() : '');
+      headers.forEach((h, i) => obj[h] = data[i] || '');
       return obj;
     });
   }
@@ -28,10 +53,11 @@
       card.className = 'card';
       card.style.animationDelay = `${i * 0.1}s`;
       card.innerHTML = `
-        <h2>${app['Applicant Name']}</h2>
-        <p>Submitted: ${app['Date Submitted'] || 'N/A'}</p>
-        <p>${app['Notes'] || ''}</p>
-        <span class="status ${app['Status']}">${app['Status'] || 'Pending'}</span>
+        <h2>${app['Task']}</h2>
+        <p>Status: ${app['Status']}</p>
+        <p>Assignee: ${app['Assignee']}</p>
+        <p>Due date: ${app['Due date'] || 'N/A'}</p>
+        <p>Updated: ${app['Updated at'] || 'N/A'}</p>
       `;
       appList.appendChild(card);
     });
@@ -53,11 +79,15 @@
 
   searchInput.addEventListener('input', () => {
     const term = searchInput.value.toLowerCase();
-    const filtered = applications.filter(app => app['Applicant Name'].toLowerCase().includes(term));
+    const filtered = applications.filter(app => app['Task'].toLowerCase().includes(term));
     renderApps(filtered);
   });
 
   fetchData();
-  setInterval(fetchData, 60000);
+  setInterval(fetchData, 60000); // refresh every minute
 </script>
+
+</body>
+</html>
+
 
