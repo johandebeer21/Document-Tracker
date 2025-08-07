@@ -134,13 +134,7 @@
       background-size: 600% 600%;
       animation: pulseGradient 3s ease infinite;
       box-shadow: 0 0 12px #10b981cc;
-    }
-
-    .Not\ started {
-      background: linear-gradient(270deg, #f59e0b, #fbbf24, #f59e0b);
-      background-size: 600% 600%;
-      animation: pulseGradient 3s ease infinite;
-      box-shadow: 0 0 12px #f59e0bcc;
+      color: white;
     }
 
     .Pending {
@@ -148,6 +142,23 @@
       background-size: 600% 600%;
       animation: pulseGradient 3s ease infinite;
       box-shadow: 0 0 12px #fbbf24cc;
+      color: white;
+    }
+
+    .In-progress {
+      background: linear-gradient(270deg, #3b82f6, #60a5fa, #3b82f6);
+      background-size: 600% 600%;
+      animation: pulseGradient 3s ease infinite;
+      box-shadow: 0 0 12px #3b82f6cc;
+      color: white;
+    }
+
+    .Not-started {
+      background: linear-gradient(270deg, #f59e0b, #fbbf24, #f59e0b);
+      background-size: 600% 600%;
+      animation: pulseGradient 3s ease infinite;
+      box-shadow: 0 0 12px #f59e0bcc;
+      color: white;
     }
 
     @keyframes pulseGradient {
@@ -235,7 +246,7 @@
       card.className = 'card';
       card.style.animationDelay = `${i * 0.1}s`;
 
-      // Clean status class for CSS
+      // convert spaces to hyphens for CSS class names
       const statusClass = app['Status'] ? app['Status'].replace(/\s+/g, '-') : 'Pending';
 
       card.innerHTML = `
@@ -255,7 +266,10 @@
     appList.innerHTML = '<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>';
     clientInfoDiv.textContent = 'Loading client info...';
 
-    fetch(CSV_URL)
+    // Add cache buster to avoid stale cache issues
+    const urlWithCacheBust = CSV_URL + '&cacheBust=' + Date.now();
+
+    fetch(urlWithCacheBust)
       .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch'))
       .then(text => {
         applications = parseCSV(text);
@@ -281,6 +295,7 @@
 
 </body>
 </html>
+
 
 
 
