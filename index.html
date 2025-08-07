@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Application Tracker</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9fafb;
+    padding: 20px;
+  }
+  .card {
+    background: white;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.5s forwards;
+  }
+  .status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+  }
+  .Pending {
+    background: #fbbf24;
+    color: #92400e;
+  }
+  .Approved {
+    background: #86efac;
+    color: #166534;
+  }
+  .Rejected {
+    background: #f87171;
+    color: #7f1d1d;
+  }
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Application Tracker</h1>
+
+<input
+  type="text"
+  id="search"
+  placeholder="Search applicant..."
+  style="padding:8px; width:100%; max-width:400px; margin-bottom:20px;"
+/>
+
+<div id="app-list">Loading data...</div>
+
+<script>
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJfYDKsGDXJmJqQ3ClFvFJMHNCuA4vdTfqaNh0Pv0TVIVrUJdzRltzX6yIbjU21kTL8n0jaTZrw1kK/pub?gid=2052124638&single=true&output=csv';
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = lines.shift().split(',');
+    return lines.map((line) => {
+      const data = line.split(',');
+      const obj = {};
+      headers.forEach((h, i) => {
+        obj[h.trim()] = data[i] ? data[i].trim() : '';
+      });
+      return obj;
+    });
+  }
+
+  const appList = document.getElementById('app-list');
+  const searchInput = document.getElementById('search');
+
+  let applications = [];
+
+  function renderApps(list) {
+    if (!list.length) {
+      appList.innerHTML = '<p>No applications found.</p>';
+      return;
+    }
+    appList.innerHTML = '';
+    list.forEach((app, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = `${i * 0.1}s`;
+      card.innerHTML = `
+        <h2>${app['Applicant Name']}</h2>
+        <p>Submitted: ${app['Date Submitted'] || 'N/A'}</p>
+        <p>${app['Notes'] || ''}</p>
+        <span class="status ${app['Status']}">${app['Status'] || 'Pending'}</span>
+      `;
+      appList.appendChild(card);
+    });
+  }
+
+  function fetchData() {
+    appList.textContent = 'Loading data...';
+    fetch(CSV_URL)
+      .then((res) => res.text())
+      .then((text) => {
+        applications = parseCSV(text);
+        renderApps(applications);
+      })
+      .catch((err) => {
+        appList.textContent = 'Failed to load data.';
+        console.error(err);
+      });
+  }
+
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase();
+    const filtered = applications.filter((app) =>
+      app['Applicant Name'].toLowerCase().includes(term)
+    );
+    renderApps(filtered);
+  });
+
+  fetchData();
+  setInterval(fetchData, 60000);
+</script>
+
+</body>
+</html>
