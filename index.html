@@ -134,6 +134,111 @@
     }
 
     /* Responsive */
+    @media (min-width: 768px) {
+      #app-list {
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Application Tracker</h1>
+
+<div class="client-info" id="client-info">Loading client info...</div>
+
+<input type="text" id="search" placeholder="Search tasks..." autocomplete="off" />
+
+<div id="app-list">Loading data...</div>
+
+<script>
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtqULGR-HUX-Lp7ryJrR_KfuG_NeubNjYe3CvCAvDngUHsUf4VXwqZOyCDSScKadslN3JTTBp9ST3Q/pub?output=csv';
+
+  let applications = [];
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const headers = lines.shift().split(',').map(h => h.trim());
+    return lines.map(line => {
+      const data = line.split(',').map(d => d.trim());
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = data[i] || '');
+      return obj;
+    });
+  }
+
+  const appList = document.getElementById('app-list');
+  const searchInput = document.getElementById('search');
+  const clientInfoDiv = document.getElementById('client-info');
+
+  function renderClientInfo(apps) {
+    if (!apps.length) {
+      clientInfoDiv.textContent = 'No client information found.';
+      return;
+    }
+    const first = apps[0];
+    clientInfoDiv.innerHTML = `
+      <div><strong>Client Name:</strong> ${first['Name'] || '-'}</div>
+      <div><strong>Client Surname:</strong> ${first['Surname'] || '-'}</div>
+      <div><strong>Application Type:</strong> ${first['Application type'] || '-'}</div>
+    `;
+  }
+
+  function renderApps(list) {
+    if (!list.length) {
+      appList.innerHTML = '<p>No applications found.</p>';
+      return;
+    }
+    appList.innerHTML = '';
+    list.forEach((app, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = `${i * 0.1}s`;
+
+      const statusClass = app['Status'] ? app['Status'].replace(/\s+/g, '-') : 'Pending';
+
+      card.innerHTML = `
+        <h3 class="task-title">${app['Task']}</h3>
+        <div class="info-row"><span>Status:</span> <span class="status ${statusClass}">${app['Status']}</span></div>
+        <div class="info-row"><span>Assignee:</span> <span>${app['Assignee'] || '-'}</span></div>
+        <div class="info-row"><span>Due date:</span> <span>${app['Due date'] || '-'}</span></div>
+        <div class="info-row"><span>Updated at:</span> <span>${app['Updated at'] || '-'}</span></div>
+      `;
+
+      appList.appendChild(card);
+    });
+  }
+
+  function fetchData() {
+    appList.textContent = 'Loading data...';
+    fetch(CSV_URL)
+      .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch'))
+      .then(text => {
+        applications = parseCSV(text);
+        renderClientInfo(applications);
+        renderApps(applications);
+      })
+      .catch(err => {
+        appList.innerHTML = '<p>Failed to load data.</p>';
+        clientInfoDiv.textContent = '';
+        console.error(err);
+      });
+  }
+
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.toLowerCase();
+    const filtered = applications.filter(app => app['Task'].toLowerCase().includes(term));
+    renderApps(filtered);
+  });
+
+  fetchData();
+  setInterval(fetchData, 60000);
+</script>
+
+</body>
+</html>
+
 
 
 
