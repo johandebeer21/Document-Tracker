@@ -1,300 +1,89 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Application Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Document Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-
     body {
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
       font-family: 'Inter', sans-serif;
-      background: #f3f4f6;
-      margin: 0; padding: 20px;
-      color: #1f2937;
     }
-
-    h1 {
-      font-weight: 700;
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      text-align: center;
-      color: #111827;
+    .fade-in {
+      animation: fadeIn 0.6s ease-in forwards;
     }
-
-    .client-info {
-      background: #fff;
-      max-width: 600px;
-      margin: 0 auto 30px auto;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.2rem;
-      color: #374151;
-      letter-spacing: 0.02em;
-      user-select: none;
+    @keyframes fadeIn {
+      0% {opacity: 0; transform: translateY(20px);}
+      100% {opacity: 1; transform: translateY(0);}
     }
-
-    #search {
-      display: block;
-      max-width: 600px;
-      margin: 0 auto 30px auto;
-      width: 100%;
-      padding: 14px 20px;
-      font-size: 1rem;
-      border-radius: 12px;
-      border: 2px solid #e5e7eb;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      outline: none;
-      user-select: auto;
-    }
-    #search:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 12px #3b82f6;
-    }
-
-    #app-list {
-      max-width: 600px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-      user-select: none;
-    }
-
-    /* Loading skeleton styles */
-    .skeleton-card {
-      background: linear-gradient(90deg, #eee 25%, #ddd 50%, #eee 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      height: 120px;
-      border-radius: 14px;
-    }
-    @keyframes shimmer {
-      0% {background-position: 200% 0;}
-      100% {background-position: -200% 0;}
-    }
-
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 20px 25px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      transform: translateY(40px) scale(0.95);
-      opacity: 0;
-      animation: fadeUpScale 0.5s forwards;
-      transition: box-shadow 0.3s ease, transform 0.3s ease;
-      user-select: text;
-    }
-
-    .card:hover {
-      box-shadow: 0 24px 48px rgba(59, 130, 246, 0.3);
-      transform: translateY(-4px) scale(1.02);
-    }
-
-    .task-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #111827;
-    }
-
-    .info-row {
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-      color: #4b5563;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .status {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 6px 14px;
+    .status-badge {
+      padding: 0.25rem 0.5rem;
       border-radius: 9999px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      color: white;
-      text-transform: uppercase;
-      user-select: none;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 0 10px rgba(0,0,0,0.15);
-    }
-
-    /* Status colors with animated gradients */
-    .Done {
-      background: linear-gradient(270deg, #10b981, #14d79d, #10b981);
-      background-size: 600% 600%;
-      animation: pulseGradient 3s ease infinite;
-      box-shadow: 0 0 12px #10b981cc;
-      color: white;
-    }
-
-    .Pending {
-      background: linear-gradient(270deg, #fbbf24, #fde68a, #fbbf24);
-      background-size: 600% 600%;
-      animation: pulseGradient 3s ease infinite;
-      box-shadow: 0 0 12px #fbbf24cc;
-      color: white;
-    }
-
-    .In-progress {
-      background: linear-gradient(270deg, #3b82f6, #60a5fa, #3b82f6);
-      background-size: 600% 600%;
-      animation: pulseGradient 3s ease infinite;
-      box-shadow: 0 0 12px #3b82f6cc;
-      color: white;
-    }
-
-    .Not-started {
-      background: linear-gradient(270deg, #f59e0b, #fbbf24, #f59e0b);
-      background-size: 600% 600%;
-      animation: pulseGradient 3s ease infinite;
-      box-shadow: 0 0 12px #f59e0bcc;
-      color: white;
-    }
-
-    @keyframes pulseGradient {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
-    }
-
-    @keyframes fadeUpScale {
-      0% {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    /* Responsive */
-    @media (min-width: 768px) {
-      #app-list {
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-      }
+      font-weight: 600;
+      font-size: 0.75rem;
     }
   </style>
 </head>
-<body>
 
-<h1>Application Tracker</h1>
+<body class="p-6">
+  <div class="max-w-4xl mx-auto">
+    <div id="clientInfo" class="bg-white rounded-2xl shadow-lg p-6 mb-6 fade-in">
+      <h2 class="text-xl font-bold mb-2">📌 Client Info</h2>
+      <p><strong>Name:</strong> <span id="clientName"></span></p>
+      <p><strong>Surname:</strong> <span id="clientSurname"></span></p>
+      <p><strong>Application Type:</strong> <span id="clientAppType"></span></p>
+    </div>
 
-<div class="client-info" id="client-info">Loading client info...</div>
+    <div id="taskList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </div>
 
-<input type="text" id="search" placeholder="Search tasks..." autocomplete="off" />
+  <script>
+    const sheetURL = "https://api.allorigins.win/raw?url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2Fe%2F2PACX-1vQtqULGR-HUX-Lp7ryJrR_KfuG_NeubNjYe3CvCAvDngUHsUf4VXwqZOyCDSScKadslN3JTTBp9ST3Q%2Fpub%3Foutput%3Dcsv";
 
-<div id="app-list">
-  <!-- Loading skeletons while fetching -->
-  <div class="skeleton-card"></div>
-  <div class="skeleton-card"></div>
-  <div class="skeleton-card"></div>
-</div>
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(csv => {
+        const rows = csv.split("\n").map(row => row.split(","));
+        const [nameLabel, surnameLabel, appTypeLabel] = rows[0];
+        const [name, surname, appType] = rows[1];
 
-<script>
-  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQtqULGR-HUX-Lp7ryJrR_KfuG_NeubNjYe3CvCAvDngUHsUf4VXwqZOyCDSScKadslN3JTTBp9ST3Q/pub?output=csv';
+        document.getElementById("clientName").textContent = name;
+        document.getElementById("clientSurname").textContent = surname;
+        document.getElementById("clientAppType").textContent = appType;
 
-  let applications = [];
+        const tasks = rows.slice(3); // Skip header + personal info row
 
-  function parseCSV(text) {
-    const lines = text.trim().split('\n');
-    const headers = lines.shift().split(',').map(h => h.trim());
-    return lines.map(line => {
-      const data = line.split(',').map(d => d.trim());
-      const obj = {};
-      headers.forEach((h, i) => obj[h] = data[i] || '');
-      return obj;
-    });
-  }
+        const taskContainer = document.getElementById("taskList");
+        tasks.forEach((task, i) => {
+          const [taskName, status, assignee, dueDate, priority, completed, description,, updatedAt, effort] = task;
+          const statusColor = status.includes("Done") ? 'bg-green-100 text-green-800' :
+                              status.includes("In progress") ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-200 text-gray-800';
 
-  const appList = document.getElementById('app-list');
-  const searchInput = document.getElementById('search');
-  const clientInfoDiv = document.getElementById('client-info');
+          const card = document.createElement("div");
+          card.className = "bg-white rounded-xl p-5 shadow-md fade-in hover:scale-[1.02] transition-transform";
+          card.innerHTML = `
+            <h3 class="text-lg font-semibold mb-1">${taskName}</h3>
+            <div class="mb-2 status-badge ${statusColor}">${status || 'Not started'}</div>
+            <p class="text-sm text-gray-600"><strong>Assignee:</strong> ${assignee || 'Unassigned'}</p>
+            <p class="text-sm text-gray-600"><strong>Due:</strong> ${dueDate || 'N/A'}</p>
+            <p class="text-sm text-gray-600"><strong>Priority:</strong> ${priority || 'Normal'}</p>
+            <p class="text-sm text-gray-600"><strong>Completed:</strong> ${completed || 'No'}</p>
+            <p class="text-sm text-gray-600"><strong>Updated:</strong> ${updatedAt || 'N/A'}</p>
+            <p class="text-sm mt-2">${description || ''}</p>
+          `;
 
-  function renderClientInfo(apps) {
-    if (!apps.length) {
-      clientInfoDiv.textContent = 'No client information found.';
-      return;
-    }
-    const first = apps[0];
-    clientInfoDiv.innerHTML = `
-      <div><strong>Client Name:</strong> ${first['Name'] || '-'}</div>
-      <div><strong>Client Surname:</strong> ${first['Surname'] || '-'}</div>
-      <div><strong>Application Type:</strong> ${first['Application type'] || '-'}</div>
-    `;
-  }
-
-  function renderApps(list) {
-    if (!list.length) {
-      appList.innerHTML = '<p>No applications found.</p>';
-      return;
-    }
-    appList.innerHTML = '';
-    list.forEach((app, i) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.style.animationDelay = `${i * 0.1}s`;
-
-      // convert spaces to hyphens for CSS class names
-      const statusClass = app['Status'] ? app['Status'].replace(/\s+/g, '-') : 'Pending';
-
-      card.innerHTML = `
-        <h3 class="task-title">${app['Task']}</h3>
-        <div class="info-row"><span>Status:</span> <span class="status ${statusClass}">${app['Status']}</span></div>
-        <div class="info-row"><span>Assignee:</span> <span>${app['Assignee'] || '-'}</span></div>
-        <div class="info-row"><span>Due date:</span> <span>${app['Due date'] || '-'}</span></div>
-        <div class="info-row"><span>Updated at:</span> <span>${app['Updated at'] || '-'}</span></div>
-      `;
-
-      appList.appendChild(card);
-    });
-  }
-
-  function fetchData() {
-    // Show skeleton loading cards
-    appList.innerHTML = '<div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>';
-    clientInfoDiv.textContent = 'Loading client info...';
-
-    // Add cache buster to avoid stale cache issues
-    const urlWithCacheBust = CSV_URL + '&cacheBust=' + Date.now();
-
-    fetch(urlWithCacheBust)
-      .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch'))
-      .then(text => {
-        applications = parseCSV(text);
-        renderClientInfo(applications);
-        renderApps(applications);
-      })
-      .catch(err => {
-        appList.innerHTML = '<p>Failed to load data.</p>';
-        clientInfoDiv.textContent = '';
-        console.error(err);
+          taskContainer.appendChild(card);
+        });
       });
-  }
-
-  searchInput.addEventListener('input', () => {
-    const term = searchInput.value.toLowerCase();
-    const filtered = applications.filter(app => app['Task'].toLowerCase().includes(term));
-    renderApps(filtered);
-  });
-
-  fetchData();
-  setInterval(fetchData, 60000);
-</script>
-
+  </script>
 </body>
+
 </html>
+
 
 
 
