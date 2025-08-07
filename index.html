@@ -1,10 +1,7 @@
 <script>
-  const CSV_URL = 'https://docs.google.com/spreadsheets/d/1ZTJWdmeVqziiFBVj3MVB1d03_7bKPEmiYuG8xkIInco/gviz/tq?tqx=out:csv';
+  const CSV_RAW_URL = 'https://docs.google.com/spreadsheets/d/1ZTJWdmeVqziiFBVj3MVB1d03_7bKPEmiYuG8xkIInco/export?format=csv&gid=2052124638';
+  const CSV_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_RAW_URL);
 
-  // Use AllOrigins to bypass CORS
-  const PROXIED_CSV_URL = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL);
-
-  // Simple CSV parser
   function parseCSV(text) {
     const lines = text.trim().split('\n');
     const headers = lines.shift().split(',');
@@ -30,7 +27,6 @@
       const card = document.createElement('div');
       card.className = 'card';
       card.style.animationDelay = `${i * 0.1}s`;
-
       card.innerHTML = `
         <h2>${app['Applicant Name']}</h2>
         <p>Submitted: ${app['Date Submitted'] || 'N/A'}</p>
@@ -43,14 +39,14 @@
 
   function fetchData() {
     appList.textContent = 'Loading data...';
-    fetch(PROXIED_CSV_URL)
-      .then(res => res.text())
+    fetch(CSV_URL)
+      .then(res => res.ok ? res.text() : Promise.reject('Failed to fetch'))
       .then(text => {
         applications = parseCSV(text);
         renderApps(applications);
       })
       .catch(err => {
-        appList.textContent = 'Failed to load data.';
+        appList.innerHTML = '<p>Failed to load data.</p>';
         console.error(err);
       });
   }
@@ -62,5 +58,6 @@
   });
 
   fetchData();
-  setInterval(fetchData, 60000); // Refresh every 60 seconds
+  setInterval(fetchData, 60000);
 </script>
+
